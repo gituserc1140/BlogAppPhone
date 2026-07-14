@@ -62,6 +62,10 @@ def normalize_spacing(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
+def describe_audience(audience):
+    return "readers" if audience == GENERAL_AUDIENCE else audience.lower()
+
+
 def populate_editor_fields(assistant_result, overwrite_existing):
     if overwrite_existing or not st.session_state["blog_title"].strip():
         st.session_state["blog_title"] = assistant_result["title"]
@@ -72,11 +76,12 @@ def populate_editor_fields(assistant_result, overwrite_existing):
 def generate_assistance(topic, audience, tone, goal, raw_points):
     topic_text = normalize_spacing(topic)
     key_points = parse_key_points(raw_points)
+    audience_text = describe_audience(audience)
     audience_suffix = "" if audience == GENERAL_AUDIENCE else f" for {audience.lower()}"
     title = f"{topic_text}: A {tone.lower()} guide{audience_suffix}"
 
     outline = [
-        f"Introduction: why {topic_text} matters to {audience.lower()}",
+        f"Introduction: why {topic_text} matters to {audience_text}",
         f"Core idea 1: explain the main challenge tied to {goal.lower()}",
         f"Core idea 2: break the topic into practical steps or lessons",
     ]
@@ -92,7 +97,7 @@ def generate_assistance(topic, audience, tone, goal, raw_points):
     draft = f"""# {title}
 
 ## Introduction
-{topic_text} is easier to act on when it is explained in a {tone.lower()} way for {audience.lower()}. In this post, focus on {goal.lower()} so readers quickly understand why the topic matters and what to do next.
+{topic_text} is easier to act on when it is explained in a {tone.lower()} way for {audience_text}. In this post, focus on {goal.lower()} so readers quickly understand why the topic matters and what to do next.
 
 ## Main Takeaways
 {talking_points}
@@ -109,7 +114,7 @@ Close by summarizing the most important point and inviting readers to try one sp
 
     checklist = [
         f"Use a {tone.lower()} tone from the opening paragraph onward.",
-        f"Keep the article focused on helping {audience.lower()}.",
+        f"Keep the article focused on helping {audience_text}.",
         f"Make sure every section supports the goal of {goal.lower()}.",
         "Add one concrete example, story, or result to build trust.",
         "End with a clear takeaway or call to action.",
