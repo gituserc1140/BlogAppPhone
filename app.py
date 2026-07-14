@@ -1,7 +1,7 @@
 import json
 import os
-import re
-from datetime import datetime
+import uuid
+from datetime import datetime, timezone
 
 import streamlit as st
 
@@ -11,32 +11,18 @@ BLOG_DIR = os.path.join(BASE_DIR, "blog_posts")
 os.makedirs(BLOG_DIR, exist_ok=True)
 
 
-def sanitize_title_for_filename(title):
-    slug = re.sub(r"[^a-zA-Z0-9]+", "-", title.strip().lower()).strip("-")
-    return slug or "untitled-blog"
-
-
-def build_blog_path(title):
-    base_name = sanitize_title_for_filename(title)
-    filename = f"{base_name}.json"
-    path = os.path.join(BLOG_DIR, filename)
-    counter = 2
-
-    while os.path.exists(path):
-        filename = f"{base_name}-{counter}.json"
-        path = os.path.join(BLOG_DIR, filename)
-        counter += 1
-
-    return path
+def build_blog_path():
+    filename = f"blog-{uuid.uuid4().hex}.json"
+    return os.path.join(BLOG_DIR, filename)
 
 
 def save_blog(title, content):
     payload = {
         "title": title.strip(),
         "content": content.strip(),
-        "created_at": datetime.utcnow().isoformat(timespec="seconds"),
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
-    with open(build_blog_path(title), "w", encoding="utf-8") as file:
+    with open(build_blog_path(), "w", encoding="utf-8") as file:
         json.dump(payload, file, ensure_ascii=False, indent=2)
 
 
@@ -57,6 +43,13 @@ def parse_key_points(raw_points):
         if cleaned:
             points.append(cleaned)
     return points[:5]
+
+
+def populate_editor_fields(assistant_result, overwrite_existing):
+    if overwrite_existing or not st.session_state["blog_title"].strip():
+        st.session_state["blog_title"] = assistant_result["title"]
+    if overwrite_existing or not st.session_state["blog_content"].strip():
+        st.session_state["blog_content"] = assistant_result["draft"]
 
 
 def generate_assistance(topic, audience, tone, goal, raw_points):
@@ -140,10 +133,7 @@ if page == "Write Blog":
     if st.button("Create writing kit"):
         if topic.strip():
             st.session_state["assistant_result"] = generate_assistance(topic, audience, tone, goal, key_points)
-            if not st.session_state["blog_title"].strip():
-                st.session_state["blog_title"] = st.session_state["assistant_result"]["title"]
-            if not st.session_state["blog_content"].strip():
-                st.session_state["blog_content"] = st.session_state["assistant_result"]["draft"]
+            populate_editor_fields(st.session_state["assistant_result"], overwrite_existing=False)
             st.success("Writing kit created. Review it below, then publish when ready.")
         else:
             st.error("Add a topic to generate a writing kit.")
@@ -159,8 +149,7 @@ if page == "Write Blog":
         for item in assistant_result["checklist"]:
             st.write(f"- {item}")
         if st.button("Load starter draft into editor"):
-            st.session_state["blog_title"] = assistant_result["title"]
-            st.session_state["blog_content"] = assistant_result["draft"]
+            populate_editor_fields(assistant_result, overwrite_existing=True)
 
     title = st.text_input("Blog Title", key="blog_title")
     content = st.text_area("Blog Content", key="blog_content", height=320)
@@ -170,6 +159,7 @@ if page == "Write Blog":
             save_blog(title, content)
             st.session_state["blog_title"] = ""
             st.session_state["blog_content"] = ""
+            st.session_state["assistant_result"] = None
             st.success("Blog published successfully!")
         else:
             st.error("Please fill in both title and content.")
