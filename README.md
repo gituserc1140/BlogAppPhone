@@ -2,7 +2,7 @@
 
 A simple blog application built with Streamlit that helps users plan, draft, publish, and view blog posts. The writing assistant is fully built into the app, so it does not require an API key or paid AI credits.
 
-[![Open in Streamlit Cloud](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://YOUR-STREAMLIT-CLOUD-APP-URL.streamlit.app/)
+[![Open in Streamlit Cloud](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blogapp-k9o648nkneiwbcgtnfe6yu.streamlit.app/)
 
 ## Features
 - Generate a lightweight writing kit with a suggested title, outline, starter draft, and revision checklist
