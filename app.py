@@ -18,6 +18,17 @@ def build_blog_path():
     return os.path.join(BLOG_DIR, filename)
 
 
+def created_at_key(blog):
+    fallback_created_at = datetime(1970, 1, 1, tzinfo=timezone.utc)
+    created_at = blog.get("created_at")
+    if not created_at:
+        return fallback_created_at
+    try:
+        return datetime.fromisoformat(created_at)
+    except ValueError:
+        return fallback_created_at
+
+
 def save_blog(title, content):
     payload = {
         "title": title.strip(),
@@ -34,17 +45,6 @@ def load_blogs():
         if filename.endswith(".json"):
             with open(os.path.join(BLOG_DIR, filename), "r", encoding="utf-8") as file:
                 blogs.append(json.load(file))
-
-    fallback_created_at = datetime(1970, 1, 1, tzinfo=timezone.utc)
-
-    def created_at_key(blog):
-        created_at = blog.get("created_at")
-        if not created_at:
-            return fallback_created_at
-        try:
-            return datetime.fromisoformat(created_at)
-        except ValueError:
-            return fallback_created_at
 
     return sorted(blogs, key=created_at_key, reverse=True)
 
