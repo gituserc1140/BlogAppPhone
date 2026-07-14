@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -33,13 +34,22 @@ def load_blogs():
             with open(os.path.join(BLOG_DIR, filename), "r", encoding="utf-8") as file:
                 blogs.append(json.load(file))
 
-    return sorted(blogs, key=lambda blog: blog.get("created_at", ""), reverse=True)
+    def created_at_key(blog):
+        created_at = blog.get("created_at")
+        if not created_at:
+            return datetime.min.replace(tzinfo=timezone.utc)
+        try:
+            return datetime.fromisoformat(created_at)
+        except ValueError:
+            return datetime.min.replace(tzinfo=timezone.utc)
+
+    return sorted(blogs, key=created_at_key, reverse=True)
 
 
 def parse_key_points(raw_points):
     points = []
     for line in raw_points.splitlines():
-        cleaned = line.strip(" -•\t")
+        cleaned = re.sub(r"^\s*(?:[-*•>]+|\d+[.)])?\s*", "", line).strip()
         if cleaned:
             points.append(cleaned)
     return points[:5]
@@ -161,6 +171,7 @@ if page == "Write Blog":
             st.session_state["blog_content"] = ""
             st.session_state["assistant_result"] = None
             st.success("Blog published successfully!")
+            st.rerun()
         else:
             st.error("Please fill in both title and content.")
 
