@@ -1,8 +1,9 @@
 # Streamlit Blog App
 
-A simple blog application built with Streamlit that allows users to write and view blogs. This app is designed to operate within the Streamlit free tier and does not require an API key.
+A simple blog application built with Streamlit that helps users plan, draft, publish, and view blog posts. The writing assistant is fully built into the app, so it does not require an API key or paid AI credits.
 
 ## Features
+- Generate a lightweight writing kit with a suggested title, outline, starter draft, and revision checklist
 - Write and publish blogs
 - View all published blogs
 - Simple and intuitive interface
@@ -21,7 +22,7 @@ A simple blog application built with Streamlit that allows users to write and vi
    ```bash
    streamlit run app.py
    ```
-4. Open the app in your browser and start writing or viewing blogs!
+4. Open the app in your browser and start generating drafts, writing, or viewing blogs!
 
 ## Directory Structure
 - `app.py`: The main Streamlit application file.
@@ -31,4 +32,5 @@ A simple blog application built with Streamlit that allows users to write and vi
 
 ## Notes
 - Blog posts are stored locally in the `blog_posts` directory as JSON files.
+- The writing assistant uses built-in templates and text generation rules, so it does not spend API credits.
 - Ensure you have sufficient space in your Streamlit Cloud environment if deploying there.
