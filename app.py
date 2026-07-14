@@ -55,6 +55,10 @@ def parse_key_points(raw_points):
     return points[:5]
 
 
+def normalize_spacing(text):
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def populate_editor_fields(assistant_result, overwrite_existing):
     if overwrite_existing or not st.session_state["blog_title"].strip():
         st.session_state["blog_title"] = assistant_result["title"]
@@ -63,12 +67,13 @@ def populate_editor_fields(assistant_result, overwrite_existing):
 
 
 def generate_assistance(topic, audience, tone, goal, raw_points):
+    topic_text = normalize_spacing(topic)
     key_points = parse_key_points(raw_points)
     audience_suffix = "" if audience == "General readers" else f" for {audience.lower()}"
-    title = f"{topic.strip().title()}: A {tone.lower()} guide{audience_suffix}"
+    title = f"{topic_text}: A {tone.lower()} guide{audience_suffix}"
 
     outline = [
-        f"Introduction: why {topic.strip()} matters to {audience.lower()}",
+        f"Introduction: why {topic_text} matters to {audience.lower()}",
         f"Core idea 1: explain the main challenge tied to {goal.lower()}",
         f"Core idea 2: break the topic into practical steps or lessons",
     ]
@@ -84,13 +89,13 @@ def generate_assistance(topic, audience, tone, goal, raw_points):
     draft = f"""# {title}
 
 ## Introduction
-{topic.strip()} is easier to act on when it is explained in a {tone.lower()} way for {audience.lower()}. In this post, focus on {goal.lower()} so readers quickly understand why the topic matters and what to do next.
+{topic_text} is easier to act on when it is explained in a {tone.lower()} way for {audience.lower()}. In this post, focus on {goal.lower()} so readers quickly understand why the topic matters and what to do next.
 
 ## Main Takeaways
 {talking_points}
 
 ## First Section
-Start with the reader's current situation, then explain the biggest obstacle around {topic.strip().lower()}. Keep the examples concrete so the post feels useful instead of abstract.
+Start with the reader's current situation, then explain the biggest obstacle around {topic_text.lower()}. Keep the examples concrete so the post feels useful instead of abstract.
 
 ## Second Section
 Turn the topic into a short sequence of actions, lessons, or principles. Use short paragraphs and make each one move the reader closer to {goal.lower()}.
@@ -147,6 +152,7 @@ if page == "Write Blog":
             st.success("Writing kit created. Review it below, then publish when ready.")
         else:
             st.error("Add a topic to generate a writing kit.")
+    st.caption("Creating a new writing kit will not replace your current editor text unless you load the starter draft.")
 
     assistant_result = st.session_state.get("assistant_result")
     if assistant_result:
