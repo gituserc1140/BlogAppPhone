@@ -34,14 +34,16 @@ def load_blogs():
             with open(os.path.join(BLOG_DIR, filename), "r", encoding="utf-8") as file:
                 blogs.append(json.load(file))
 
+    fallback_created_at = datetime(1970, 1, 1, tzinfo=timezone.utc)
+
     def created_at_key(blog):
         created_at = blog.get("created_at")
         if not created_at:
-            return datetime.min.replace(tzinfo=timezone.utc)
+            return fallback_created_at
         try:
             return datetime.fromisoformat(created_at)
         except ValueError:
-            return datetime.min.replace(tzinfo=timezone.utc)
+            return fallback_created_at
 
     return sorted(blogs, key=created_at_key, reverse=True)
 
