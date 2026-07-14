@@ -8,6 +8,7 @@ import streamlit as st
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOG_DIR = os.path.join(BASE_DIR, "blog_posts")
+GENERAL_AUDIENCE = "General readers"
 
 os.makedirs(BLOG_DIR, exist_ok=True)
 
@@ -71,7 +72,7 @@ def populate_editor_fields(assistant_result, overwrite_existing):
 def generate_assistance(topic, audience, tone, goal, raw_points):
     topic_text = normalize_spacing(topic)
     key_points = parse_key_points(raw_points)
-    audience_suffix = "" if audience == "General readers" else f" for {audience.lower()}"
+    audience_suffix = "" if audience == GENERAL_AUDIENCE else f" for {audience.lower()}"
     title = f"{topic_text}: A {tone.lower()} guide{audience_suffix}"
 
     outline = [
@@ -134,7 +135,7 @@ if page == "Write Blog":
     topic = st.text_input("Topic", placeholder="Example: Budget travel tips for families")
     audience = st.selectbox(
         "Audience",
-        ["General readers", "Beginners", "Busy professionals", "Small business owners", "Students"],
+        [GENERAL_AUDIENCE, "Beginners", "Busy professionals", "Small business owners", "Students"],
     )
     tone = st.selectbox("Tone", ["Helpful", "Friendly", "Professional", "Encouraging"])
     goal = st.selectbox(
@@ -154,7 +155,7 @@ if page == "Write Blog":
             st.success("Writing kit created. Review it below, then publish when ready.")
         else:
             st.error("Add a topic to generate a writing kit.")
-    st.caption("Creating a new writing kit will not replace your current editor text unless you load the starter draft.")
+    st.caption('Creating a new writing kit will not overwrite your current editor text unless you click "Load starter draft into editor."')
 
     assistant_result = st.session_state.get("assistant_result")
     if assistant_result:
